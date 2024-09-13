@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Interfaces;
 using UnityEngine;
 
-public class GameUpdater : MonoBehaviour
+public class GameUpdater : MonoBehaviour, IServisable
 {
     private readonly List<IGameUpdatable> _updateListeners = new();
 

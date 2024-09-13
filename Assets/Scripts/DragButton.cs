@@ -1,14 +1,19 @@
+using System;
+using Interfaces;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
-public class DragButton : MonoBehaviour, IDragHandler, IEndDragHandler
+public class DragButton : MonoBehaviour, IDragHandler, IEndDragHandler, IServisable
 {
     [SerializeField] private float _maxDragDistance;
-    [SerializeField] private LineRendererActivator _lineRendererActivator;
-    
+
+    public event Action<Vector2> EndDragEvent = delegate { };
+    public event Action<Vector2> DragEvent = delegate { }; 
+
     private RectTransform _rect;
     private Vector3 _position;
+    private Vector3 _direction;
 
     private void Awake()
     {
@@ -25,17 +30,17 @@ public class DragButton : MonoBehaviour, IDragHandler, IEndDragHandler
         if (!RectTransformUtility.ScreenPointToWorldPointInRectangle(_rect, eventData.position, eventData.pressEventCamera, out var worldPoint))
             return;
 
-        var direction = worldPoint - _position;
-        var newVector = Vector3.ClampMagnitude(direction, _maxDragDistance);
-        var newPosition = new Vector3(_position.x + newVector.x, _position.y + newVector.y, 0f);
-        _rect.position = newPosition;
+        _direction = (worldPoint - _position).normalized;
+        var newVector = Vector3.ClampMagnitude(_direction, _maxDragDistance);
+        _rect.position = new Vector3(_position.x + newVector.x, _position.y + newVector.y, 0f);
 
-        _lineRendererActivator.OnDrag(_position,  Camera.main.ScreenToWorldPoint(direction * 10f));//todo remove
+        DragEvent(_direction);
     }
     
     public void OnEndDrag(PointerEventData eventData)
     {
         _rect.position = _position;
-        //todo shot event
+
+        EndDragEvent(_direction);
     }
 }
