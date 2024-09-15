@@ -1,12 +1,15 @@
+using Interfaces;
 using UnityEngine;
 
-public class Walls : MonoBehaviour
+public class Walls : MonoBehaviour, IServisable
 {
     [SerializeField] private BoxCollider2D _leftWall;
     [SerializeField] private BoxCollider2D _rightWall;
     [SerializeField] private BoxCollider2D _topWall;
     [SerializeField] private BoxCollider2D _bottonWall;
     [SerializeField] private RectTransform _rightCanvasPanel;
+    
+    public Bounds Bounds { get; private set; }
 
     public void SetupWalls(Camera mainCamera)
     {
@@ -34,5 +37,7 @@ public class Walls : MonoBehaviour
         var bottomWallScale = bottomWallTr.localScale;
         bottomWallTr.localScale = new Vector3(bottomWallScale.x * scaleVector.x, 1f, 1f);
         bottomWallTr.transform.position = new Vector3(0f, -border.y - _bottonWall.size.y * 0.5f, 0f);
+
+        Bounds = new Bounds(new Vector3((border.x + rightBorder.x) * 0.5f, 0f, 0f), new Vector3(-border.x + rightBorder.x, border.y * 2f, 0f));
     }
 }

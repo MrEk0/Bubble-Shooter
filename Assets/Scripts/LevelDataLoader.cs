@@ -2,32 +2,34 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Enums;
+using Interfaces;
 using UnityEngine;
 using Utils;
 
-public class LevelDataLoader : MonoBehaviour
+public class LevelDataLoader : MonoBehaviour, IServisable
 {
     [Serializable]
-    public class RowSettings
+    public class LevelSettings
     {
-        public BallEnum Name;
+        public BallEnum Type;
         public bool IsAvailable;
     }
 
     private const string URL_PATTERN = "https://docs.google.com/spreadsheets/d/{0}/export?format=csv&gid={1}";
     private const string EDIT_URL_PATTERN = "https://docs.google.com/spreadsheets/d/{0}/edit#gid={1}";
     
-    [SerializeField] string tableId = string.Empty;
-    [SerializeField] string tableGid = "0";
+    [SerializeField] private string _tableId = string.Empty;
+    [SerializeField] private string _tableGid = "0";
+    [SerializeField] private List<LevelSettings> _rowSettings = new();
 
-    public IReadOnlyList<RowSettings> LevelRowSettings => _rowSettings;
+    public IEnumerable<LevelSettings> LevelRowSettings => _rowSettings;
 
-    private List<RowSettings> _rowSettings = new();
-
-    private void LoadData()
+    public void LoadData()
     {
+        _rowSettings.Clear();
+        
         var text = new StringBuilder();
-        text.Append(HttpHelper.HttpGet(string.Format(URL_PATTERN, tableId, tableGid), "text/csv"));
+        text.Append(HttpHelper.HttpGet(string.Format(URL_PATTERN, _tableId, _tableGid), "text/csv"));
 
         CSVReader.LoadFromString(text.ToString(), (index, line) =>
         {
@@ -38,7 +40,7 @@ public class LevelDataLoader : MonoBehaviour
             {
                 if (index == 0 && Enum.TryParse<BallEnum>(line[i], out var result))
                 {
-                    _rowSettings.Add(new RowSettings { Name = result, IsAvailable = true });
+                    _rowSettings.Add(new LevelSettings { Type = result, IsAvailable = false });
                     continue;
                 }
 
@@ -58,7 +60,7 @@ public class LevelDataLoader : MonoBehaviour
     
     public void OpenForEdit()
     {
-        Application.OpenURL(string.Format(EDIT_URL_PATTERN, tableId, tableGid));
+        Application.OpenURL(string.Format(EDIT_URL_PATTERN, _tableId, _tableGid));
     }
 #endif
 }

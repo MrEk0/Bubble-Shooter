@@ -2,13 +2,13 @@ using Interfaces;
 using JetBrains.Annotations;
 using UnityEngine;
 
-public class BallMovement : IGameUpdatable
+public class ObjectMovement : IGameUpdatable
 {
     private readonly float _velocity;
 
     [CanBeNull] private readonly Transform _owner;
 
-    public BallMovement(Transform owner, float velocity)
+    public ObjectMovement(Transform owner, float velocity)
     {
         _owner = owner;
         _velocity = velocity;

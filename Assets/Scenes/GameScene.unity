@@ -865,9 +865,11 @@ MonoBehaviour:
   _lineRenderer: {fileID: 298998678}
   _fireBall: {fileID: 1416115704}
   _mainCamera: {fileID: 519420031}
-  _walls: {fileID: 1849442021}
   _ballPoolCreator: {fileID: 1679594593}
   _gameUpdater: {fileID: 845120694}
+  _walls: {fileID: 1849442021}
+  _gameSettingsData: {fileID: 0}
+  _levelDataLoader: {fileID: 0}
 --- !u!4 &845120692
 Transform:
   m_ObjectHideFlags: 0
@@ -895,8 +897,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86e9e0864f37bc541bdeab2e5d19a998, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tableId: 1xJ7hAWk71XnjVjt6pVMQWwJ7sV83wGwPgCdSC-FzXQM
-  tableGid: 0
+  _tableId: 1xJ7hAWk71XnjVjt6pVMQWwJ7sV83wGwPgCdSC-FzXQM
+  _tableGid: 0
+  _rowSettings:
+  - Type: 0
+    IsAvailable: 0
+  - Type: 1
+    IsAvailable: 1
+  - Type: 2
+    IsAvailable: 1
+  - Type: 3
+    IsAvailable: 1
+  - Type: 4
+    IsAvailable: 1
+  - Type: 5
+    IsAvailable: 0
+  - Type: 6
+    IsAvailable: 0
+  - Type: 7
+    IsAvailable: 1
 --- !u!114 &845120694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1497,7 +1516,7 @@ GameObject:
   - component: {fileID: 1679594594}
   - component: {fileID: 1679594593}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: FireBallCreator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

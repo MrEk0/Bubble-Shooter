@@ -12,15 +12,15 @@ namespace Pools
         [SerializeField] private Ball _ballPrefab;
         
         [CanBeNull] private GameUpdater _gameUpdater;
-        
+
         public IObjectPool<Ball> ObjectPool { get; private set; }
         
-        private readonly Dictionary<GameObject, BallMovement> _objectMovements = new();
+        private readonly Dictionary<GameObject, ObjectMovement> _objectMovements = new();
 
         public void Init(ServiceLocator serviceLocator)
         {
             _gameUpdater = serviceLocator.GetService<GameUpdater>();
-            
+
             ObjectPool = new ObjectPool<Ball>(CreateProjectile, OnGetFromPool, OnReleaseToPool, OnDestroyPooledObject);
         }
 
@@ -29,7 +29,7 @@ namespace Pools
             var ball = Instantiate(_ballPrefab, transform);
             ball.ObjectPool = ObjectPool;
 
-            var movement = new BallMovement(ball.transform, 5f);
+            var movement = new ObjectMovement(ball.transform, 0f);
             _objectMovements.Add(ball.gameObject, movement);
             _gameUpdater.AddListener(movement);
             
