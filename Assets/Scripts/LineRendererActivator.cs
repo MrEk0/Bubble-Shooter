@@ -1,4 +1,3 @@
-using Game;
 using Interfaces;
 using UnityEngine;
 
@@ -11,11 +10,11 @@ public class LineRendererActivator : ISubscribable
     private float _timer;
     private bool _isActive;
     
-    public LineRendererActivator(ServiceLocator serviceLocator, Transform owner, LineRenderer lineRenderer)
+    public LineRendererActivator(DragButton dragButton, Transform owner, LineRenderer lineRenderer)
     {
         _lineRenderer = lineRenderer;
         _owner = owner;
-        _dragButton = serviceLocator.GetService<DragButton>();
+        _dragButton = dragButton;
 
         _isActive = false;
 

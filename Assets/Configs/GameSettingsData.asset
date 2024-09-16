@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: GameSettingsData
   m_EditorClassIdentifier: 
   _scorePerBall: 5
+  _levelShotsCount: 10
   _minBallsCountToRelease: 3
   _ballVelocity: 5
   _levelRowCounts: 5

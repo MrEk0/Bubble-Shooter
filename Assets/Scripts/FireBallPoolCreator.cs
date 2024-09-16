@@ -19,10 +19,7 @@ namespace Pools
         }
         
         [SerializeField] private Ball _ballPrefab;
-        
-        public event Action<Ball, Collision2D> CollisionEvent = delegate { };
-        public IObjectPool<Ball> ObjectPool { get; private set; }
-        
+
         [CanBeNull] private GameUpdater _gameUpdater;
         [CanBeNull] private GameSubscriber _gameSubscriber;
         [CanBeNull] private ServiceLocator _serviceLocator;
@@ -30,6 +27,9 @@ namespace Pools
         private float _ballVelocity;
 
         private readonly Dictionary<GameObject, FireBallSettings> _objectSettings = new();
+        
+        public event Action<Ball, Collision2D> CollisionEvent = delegate { };
+        public IObjectPool<Ball> ObjectPool { get; private set; }
 
         public void Init(ServiceLocator serviceLocator)
         {
@@ -55,6 +55,7 @@ namespace Pools
             var collision = new FireBallCollision(ball, tr, _serviceLocator, other =>
             {
                 CollisionEvent(ball, other);
+                
                 ObjectPool.Release(ball);
             });
 

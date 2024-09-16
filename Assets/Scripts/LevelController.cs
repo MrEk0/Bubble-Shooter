@@ -1,104 +1,91 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows;
 using Configs;
+using Enums;
 using Game;
 using Interfaces;
-using Pools;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
-public class LevelController : ISubscribable
+public class LevelController : IServisable
 {
-    private readonly LevelDataLoader _levelDataLoader;
-    private readonly StaticBallPoolCreator _staticBallPoolCreator;
-    private readonly FireBallPoolCreator _fireBallPoolCreator;
     private readonly GameSettingsData _data;
-    private readonly Walls _walls;
+    private readonly List<BallEnum> _availableBalls = new();
+    private readonly ServiceLocator _serviceLocator;
+    private readonly SpriteRenderer _spriteRenderer;
+    private readonly WindowSystem _windowSystem;
 
-    private List<Ball> _connectedBalls = new List<Ball>();
+    private int _currentScore;
+    private int _leftShotCount;
+    
+    private BallEnum NextBallType { get; set; }
+    
+    public event Action<int> ChangeScoreEvent = delegate { };
+    public event Action<BallEnum, int> ChangeShotsCountEvent = delegate { };
+    
+    public BallEnum CurrentBallType { get; private set; }
+    public bool IsEnoughShots => _leftShotCount > 0;
 
-    public LevelController(ServiceLocator serviceLocator)
+    public LevelController(ServiceLocator serviceLocator, SpriteRenderer spriteRenderer)
     {
-        _levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
-        _walls = serviceLocator.GetService<Walls>();
+        _serviceLocator = serviceLocator;
+        _spriteRenderer = spriteRenderer;
+
+        _windowSystem = serviceLocator.GetService<WindowSystem>();
         _data = serviceLocator.GetService<GameSettingsData>();
-        _staticBallPoolCreator = serviceLocator.GetService<StaticBallPoolCreator>();
-        _fireBallPoolCreator = serviceLocator.GetService<FireBallPoolCreator>();
+
+        var levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
+        
+        _availableBalls.AddRange(levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList());
+        
+        NextBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
+        CurrentBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
+        _leftShotCount = _data.LevelShotsCount;
     }
 
-    public void Init()
+    public void StartLevel()
     {
-        var startPosition = new Vector3(_walls.Bounds.min.x + _data.StartPositionOffset.x, _walls.Bounds.max.y + _data.StartPositionOffset.y, 0f);
-        var availableBalls = _levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList();
-        var maxBallsInRow = _data.BallSpacing.x <= 0f ? 0 : Mathf.FloorToInt((_walls.Bounds.size.x - _data.StartPositionOffset.x) / _data.BallSpacing.x) + 1; 
+        _serviceLocator.GetService<StaticBallSpawner>().StartLevel();
+        var gameSubscriber = _serviceLocator.GetService<GameSubscriber>();
+        var gameWindow = _serviceLocator.GetService<GameWindow>();
         
-        for (var i = 0; i < _data.LevelRowCounts; i++)
+        gameWindow.Init(_serviceLocator);
+        gameSubscriber.AddListener(gameWindow);
+
+        _spriteRenderer.sprite = _data.GetBallSprite(CurrentBallType);
+        
+        ChangeScoreEvent(_currentScore);
+        ChangeShotsCountEvent(NextBallType, _leftShotCount);
+    }
+
+    public void AddScore(int releasedBalls)
+    {
+        _currentScore += _data.ScorePerBall * releasedBalls;
+        
+        ChangeScoreEvent(_currentScore);
+    }
+
+    public void ChangeBallType()
+    {
+        CurrentBallType = NextBallType;
+        NextBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
+        
+        _spriteRenderer.sprite = _data.GetBallSprite(CurrentBallType);
+
+        _leftShotCount--;
+
+        if (_leftShotCount <= 0)
         {
-            var rowBalls = i % 2 != 0 ? maxBallsInRow - 1 : maxBallsInRow;
-            var rowStartPosition = i % 2 != 0 ? new Vector3(startPosition.x + _data.BallSpacing.x * 0.5f, startPosition.y, 0f) : startPosition;
-            
-            for (var j = 0; j < rowBalls; j++)
+            var setup = new EndGameWindowSetup
             {
-                var ballType = availableBalls[Random.Range(0, availableBalls.Count)];
-
-                var ball = _staticBallPoolCreator.ObjectPool.Get();
-                ball.transform.position = new Vector3(rowStartPosition.x + _data.BallSpacing.x * j, rowStartPosition.y - _data.BallSpacing.y * i, 0);
-                ball.Init(_data.GetBallSprite(ballType), ballType);
-            }
+                Score = _currentScore,
+                WindowSystem = _windowSystem
+            };
+            _windowSystem.Open<GameOverWindow, EndGameWindowSetup>(setup);
         }
-    }
 
-    public void Subscribe()
-    {
-        if (_staticBallPoolCreator == null)
-            return;
-
-        _fireBallPoolCreator.CollisionEvent += OnBallCollided;
-    }
-
-    public void Unsubscribe()
-    {
-        if (_staticBallPoolCreator == null)
-            return;
-        
-        _fireBallPoolCreator.CollisionEvent -= OnBallCollided;
-    }
-
-    private void OnBallCollided(Ball collidedBall, Collision2D collision)
-    {
-        _connectedBalls.Clear();
-
-        var collidedPos = collidedBall.transform.position;
-        var collisionBallPos = collision.transform.position;
-        var possiblePositions = new Vector3[]
-        {
-            new(collisionBallPos.x + _data.BallSpacing.x * 0.5f, collisionBallPos.y + _data.BallSpacing.y, 0f),
-            new(collisionBallPos.x + _data.BallSpacing.x * 0.5f, collisionBallPos.y - _data.BallSpacing.y, 0f),
-            new(collisionBallPos.x - _data.BallSpacing.x * 0.5f, collisionBallPos.y + _data.BallSpacing.y, 0f),
-            new(collisionBallPos.x - _data.BallSpacing.x * 0.5f, collisionBallPos.y - _data.BallSpacing.y, 0f)
-        };
-
-        var ball = _staticBallPoolCreator.ObjectPool.Get();
-        ball.transform.position = possiblePositions.OrderBy(o => Vector3.Distance(o, collidedPos)).FirstOrDefault();
-        ball.Init(_data.GetBallSprite(collidedBall.Type), collidedBall.Type);
-
-        var typedBalls = _staticBallPoolCreator.CreatedBalls.Where(o => o.Type == collidedBall.Type).ToList();
-        var maxDistance = new Vector3(_data.BallSpacing.x * 0.5f, _data.BallSpacing.y).magnitude;
-
-        GetNeighbors(typedBalls, ball.transform, maxDistance);
-
-        if (_data.MinBallsCountToRelease <= _connectedBalls.Count)
-        {
-            _staticBallPoolCreator.ReleaseBalls(_connectedBalls);
-        }
-    }
-
-    private void GetNeighbors(IReadOnlyList<Ball> list, Transform ball, float maxDistance)
-    {
-        var neighbors = list.Where(typedBall => Vector3.Distance(typedBall.transform.position, ball.position) <= maxDistance).ToList();
-        var newNeighbors = neighbors.Where(o => _connectedBalls.All(oo => o != oo && o.transform != ball.transform)).ToList();
-        _connectedBalls.AddRange(newNeighbors);
-
-        foreach (var neighbor in newNeighbors)
-            GetNeighbors(list, neighbor.transform, maxDistance);
+        ChangeShotsCountEvent(NextBallType, _leftShotCount);
     }
 }

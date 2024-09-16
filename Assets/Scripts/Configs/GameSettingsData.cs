@@ -4,6 +4,7 @@ using Enums;
 using Interfaces;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Configs
 {
@@ -18,6 +19,7 @@ namespace Configs
         }
         
         [SerializeField] private int _scorePerBall;
+        [SerializeField] private int _levelShotsCount;
         [SerializeField] private int _minBallsCountToRelease;
         [SerializeField] private float _ballVelocity;
         [SerializeField] private int _levelRowCounts;
@@ -28,6 +30,7 @@ namespace Configs
         [SerializeField] private BallSpriteSettings[] _ballSpriteSettings = Array.Empty<BallSpriteSettings>();
 
         public int ScorePerBall => _scorePerBall;
+        public int LevelShotsCount => _levelShotsCount;
         public int MinBallsCountToRelease => _minBallsCountToRelease;
         public float BallVelocity => _ballVelocity;
         public int LevelRowCounts => _levelRowCounts;
