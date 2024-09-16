@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8922248639016290384}
   - component: {fileID: 2750378528162467416}
   m_Layer: 6
-  m_Name: Ball
+  m_Name: StaticBall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -95,7 +95,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1729785018796434144}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0

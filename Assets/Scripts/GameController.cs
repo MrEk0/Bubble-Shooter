@@ -3,6 +3,7 @@ using Game;
 using Pools;
 using Spawners;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameController : MonoBehaviour
 {
@@ -10,7 +11,8 @@ public class GameController : MonoBehaviour
     [SerializeField] private LineRenderer _lineRenderer;
     [SerializeField] private Transform _fireBall;
     [SerializeField] private Camera _mainCamera;
-    [SerializeField] private BallPoolCreator _ballPoolCreator;
+    [SerializeField] private FireBallPoolCreator _fireBallPoolCreator;
+    [SerializeField] private StaticBallPoolCreator _staticBallPoolCreator;
     [SerializeField] private GameUpdater _gameUpdater;
     [SerializeField] private Walls _walls;
     [SerializeField] private GameSettingsData _gameSettingsData;
@@ -20,24 +22,29 @@ public class GameController : MonoBehaviour
     {
         _walls.SetupWalls(_mainCamera);
 
-        var gameObserver = new GameSubscriber();
+        var gameSubscriber = new GameSubscriber();
         var serviceLocator = new ServiceLocator();
 
         serviceLocator.AddService(_dragButton);
-        serviceLocator.AddService(_ballPoolCreator);
+        serviceLocator.AddService(_fireBallPoolCreator);
+        serviceLocator.AddService(_staticBallPoolCreator);
         serviceLocator.AddService(_gameUpdater);
         serviceLocator.AddService(_gameSettingsData);
         serviceLocator.AddService(_walls);
         serviceLocator.AddService(_levelDataLoader);
+        serviceLocator.AddService(gameSubscriber);
 
-        _ballPoolCreator.Init(serviceLocator);
+        _fireBallPoolCreator.Init(serviceLocator);
+        _staticBallPoolCreator.Init();
+        
         var levelController = new LevelController(serviceLocator);
         levelController.Init();
+        gameSubscriber.AddListener(levelController);
 
         var line = new LineRendererActivator(serviceLocator, _fireBall, _lineRenderer);
-        gameObserver.AddListener(line);
+        gameSubscriber.AddListener(line);
         
-        var ballSpawner = new BallSpawner(serviceLocator, _fireBall);
-        gameObserver.AddListener(ballSpawner);
+        var ballSpawner = new FireBallSpawner(serviceLocator, _fireBall);
+        gameSubscriber.AddListener(ballSpawner);
     }
 }

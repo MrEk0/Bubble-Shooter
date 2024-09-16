@@ -3,7 +3,7 @@ using Interfaces;
 
 namespace Game
 {
-    public class GameSubscriber
+    public class GameSubscriber : IServisable
     {
         private readonly List<ISubscribable> _subscribers = new();
 

@@ -4,7 +4,6 @@ using Enums;
 using Interfaces;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Configs
 {
@@ -19,19 +18,23 @@ namespace Configs
         }
         
         [SerializeField] private int _scorePerBall;
-        [FormerlySerializedAs("_ballRadius")] [SerializeField] private float ballSize;
+        [SerializeField] private int _minBallsCountToRelease;
+        [SerializeField] private float _ballVelocity;
         [SerializeField] private int _levelRowCounts;
-        [SerializeField] private int _levelColumnCounts;
         [SerializeField] private Vector2 _ballSpacing;
         [SerializeField] private Vector2 _startPositionOffset;
+        [SerializeField] private LayerMask _wallMask;
+        [SerializeField] private LayerMask _ballMask;
         [SerializeField] private BallSpriteSettings[] _ballSpriteSettings = Array.Empty<BallSpriteSettings>();
 
         public int ScorePerBall => _scorePerBall;
-        public float BallSize => ballSize;
+        public int MinBallsCountToRelease => _minBallsCountToRelease;
+        public float BallVelocity => _ballVelocity;
         public int LevelRowCounts => _levelRowCounts;
-        public int LevelColumnCounts => _levelColumnCounts;
         public Vector2 BallSpacing => _ballSpacing;
         public Vector2 StartPositionOffset => _startPositionOffset;
+        public LayerMask WallMask => _wallMask;
+        public LayerMask BallMask => _ballMask;
 
         [CanBeNull]
         public Sprite GetBallSprite(BallEnum type)

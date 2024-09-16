@@ -30,17 +30,17 @@ public class DragButton : MonoBehaviour, IDragHandler, IEndDragHandler, IServisa
         if (!RectTransformUtility.ScreenPointToWorldPointInRectangle(_rect, eventData.position, eventData.pressEventCamera, out var worldPoint))
             return;
 
-        _direction = (worldPoint - _position).normalized;
+        _direction = (worldPoint - _position);
         var newVector = Vector3.ClampMagnitude(_direction, _maxDragDistance);
         _rect.position = new Vector3(_position.x + newVector.x, _position.y + newVector.y, 0f);
 
-        DragEvent(_direction);
+        DragEvent(_direction.normalized);
     }
     
     public void OnEndDrag(PointerEventData eventData)
     {
         _rect.position = _position;
 
-        EndDragEvent(_direction);
+        EndDragEvent(_direction.normalized);
     }
 }
