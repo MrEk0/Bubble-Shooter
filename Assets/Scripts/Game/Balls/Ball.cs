@@ -1,6 +1,5 @@
 using System;
 using Enums;
-using TMPro;
 using UnityEngine;
 
 public class Ball : MonoBehaviour, ICollisionable
