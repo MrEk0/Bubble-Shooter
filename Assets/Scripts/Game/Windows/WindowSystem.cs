@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Interfaces;
 using UnityEngine;
 
-namespace Windows
+namespace Game.Windows
 {
     public class WindowSystem : MonoBehaviour, IServisable
     {

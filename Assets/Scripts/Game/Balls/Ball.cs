@@ -2,22 +2,25 @@ using System;
 using Enums;
 using UnityEngine;
 
-public class Ball : MonoBehaviour, ICollisionable
+namespace Game.Balls
 {
-    [SerializeField] private SpriteRenderer _spriteRenderer;
-
-    public event Action<Collision2D> CollisionEvent = delegate { };
-
-    public BallEnum Type { get; private set; }
-
-    public void Init(Sprite sprite, BallEnum type)
+    public class Ball : MonoBehaviour, ICollisionable
     {
-        _spriteRenderer.sprite = sprite;
-        Type = type;
-    }
+        [SerializeField] private SpriteRenderer _spriteRenderer;
 
-    private void OnCollisionEnter2D(Collision2D col)
-    {
-        CollisionEvent(col);
+        public event Action<Collision2D> CollisionEvent = delegate { };
+
+        public BallEnum Type { get; private set; }
+
+        public void Init(Sprite sprite, BallEnum type)
+        {
+            _spriteRenderer.sprite = sprite;
+            Type = type;
+        }
+
+        private void OnCollisionEnter2D(Collision2D col)
+        {
+            CollisionEvent(col);
+        }
     }
 }

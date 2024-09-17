@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Configs;
-using Game;
+using Game.Balls;
+using Game.Common;
 using Interfaces;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace Pools
+namespace Game.Pools
 {
     public class FireBallPoolCreator : MonoBehaviour, IServisable
     {

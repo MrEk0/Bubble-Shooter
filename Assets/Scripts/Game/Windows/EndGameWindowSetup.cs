@@ -1,4 +1,4 @@
-namespace Windows
+namespace Game.Windows
 {
     public class EndGameWindowSetup : AWindowSetup
     {

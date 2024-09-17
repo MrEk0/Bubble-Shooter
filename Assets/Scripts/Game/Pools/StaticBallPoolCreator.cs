@@ -1,14 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
-using Configs;
-using Enums;
-using Game;
+using Game.Balls;
 using Interfaces;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace Pools
+namespace Game.Pools
 {
     public class StaticBallPoolCreator : MonoBehaviour, IServisable
     {

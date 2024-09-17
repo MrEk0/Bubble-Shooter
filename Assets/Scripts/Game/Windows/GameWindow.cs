@@ -1,13 +1,13 @@
 using Configs;
 using Enums;
-using Game;
+using Game.Level;
 using Interfaces;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Windows
+namespace Game.Windows
 {
     public class GameWindow : MonoBehaviour, ISubscribable, IServisable
     {

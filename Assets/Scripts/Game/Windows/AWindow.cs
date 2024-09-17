@@ -1,4 +1,4 @@
-namespace Windows
+namespace Game.Windows
 {
     public abstract class AWindow<T> : ASimpleWindow where T : AWindowSetup, new()
     {

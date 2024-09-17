@@ -1,10 +1,11 @@
 using Configs;
-using Game;
+using Game.Balls;
+using Game.Level;
+using Game.Pools;
 using Interfaces;
-using Pools;
 using UnityEngine;
 
-namespace Spawners
+namespace Game.Spawners
 {
     public class FireBallSpawner : ISubscribable, IServisable
     {

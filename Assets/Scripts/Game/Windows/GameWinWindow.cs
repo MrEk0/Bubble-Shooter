@@ -3,9 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Windows
+namespace Game.Windows
 {
-    public class GameOverWindow : AWindow<EndGameWindowSetup>
+    public class GameWinWindow : AWindow<EndGameWindowSetup>
     {
         [SerializeField] private TMP_Text _scoreText;
         [SerializeField] private Button _playAgainButton;
@@ -33,7 +33,7 @@ namespace Windows
             if (_windowSystem == null)
                 return;
             
-            _windowSystem.Close<GameOverWindow>();
+            _windowSystem.Close<GameWinWindow>();
         }
     }
 }
