@@ -15,6 +15,9 @@ namespace Game
 
         public void RemoveService(IServisable service)
         {
+            if (!_services.Contains(service))
+                return;
+            
             _services.Remove(service);
         }
 

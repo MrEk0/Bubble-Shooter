@@ -24,6 +24,7 @@ namespace Configs
         [SerializeField] private int _minBallsCountToRelease;
         [SerializeField] private float _ballVelocity;
         [SerializeField] private int _levelRowCounts;
+        [SerializeField] private Vector2Int _aimLineAngleRange;
         [SerializeField] private Vector2 _ballSpacing;
         [SerializeField] private Vector2 _startPositionOffset;
         [SerializeField] private LayerMask _wallMask;
@@ -37,6 +38,7 @@ namespace Configs
         public int MinBallsCountToRelease => _minBallsCountToRelease;
         public float BallVelocity => _ballVelocity;
         public int LevelRowCounts => _levelRowCounts;
+        public Vector2Int AimLineAngleRange => _aimLineAngleRange;
         public Vector2 BallSpacing => _ballSpacing;
         public Vector2 StartPositionOffset => _startPositionOffset;
         public LayerMask WallMask => _wallMask;

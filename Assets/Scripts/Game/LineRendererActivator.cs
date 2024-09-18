@@ -1,3 +1,4 @@
+using Configs;
 using Interfaces;
 using UnityEngine;
 
@@ -5,18 +6,20 @@ namespace Game
 {
     public class LineRendererActivator : ISubscribable
     {
-        private LineRenderer _lineRenderer;
-        private DragButton _dragButton;
-        private Transform _owner;
+        private readonly LineRenderer _lineRenderer;
+        private readonly DragButton _dragButton;
+        private readonly Transform _owner;
 
+        private Vector2Int _aimLineAngleRange;
         private float _timer;
         private bool _isActive;
 
-        public LineRendererActivator(DragButton dragButton, Transform owner, LineRenderer lineRenderer)
+        public LineRendererActivator(ServiceLocator serviceLocator, DragButton dragButton, Transform owner, LineRenderer lineRenderer)
         {
             _lineRenderer = lineRenderer;
             _owner = owner;
             _dragButton = dragButton;
+            _aimLineAngleRange = serviceLocator.GetService<GameSettingsData>().AimLineAngleRange;
 
             _isActive = false;
 
@@ -43,19 +46,20 @@ namespace Game
             if (_lineRenderer == null)
                 return;
 
+            var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + 90f;
+            if ((angle >= 0f && angle > _aimLineAngleRange.x) || (angle < 0f && angle < _aimLineAngleRange.y))
+                return;
+
             _lineRenderer.enabled = _isActive;
 
             var startPos = _owner.position;
             startPos.z = 0f;
-
+            
+            _lineRenderer.positionCount = 2;
+            
             var hit = Physics2D.Raycast(startPos, -direction);
-            var reflectedVector = Vector2.Reflect(-direction, hit.normal);
-
-            _lineRenderer.positionCount = 3;
-
             _lineRenderer.SetPosition(0, startPos);
             _lineRenderer.SetPosition(1, hit.point);
-            _lineRenderer.SetPosition(2, reflectedVector * 10f);
         }
 
         private void OnEndDrag(Vector2 direction)

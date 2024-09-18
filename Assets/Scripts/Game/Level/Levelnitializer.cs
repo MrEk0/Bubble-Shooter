@@ -57,7 +57,7 @@ namespace Game.Level
             _gameSubscriber.AddListener(staticBallSpawner);
             _serviceLocator.AddService(staticBallSpawner);
 
-            var line = new LineRendererActivator(_dragButton, _fireBall.transform, _lineRenderer);
+            var line = new LineRendererActivator(_serviceLocator, _dragButton, _fireBall.transform, _lineRenderer);
             _gameSubscriber.AddListener(line);
 
             levelController.StartLevel();

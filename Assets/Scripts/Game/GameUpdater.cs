@@ -15,6 +15,9 @@ namespace Game
 
         public void RemoveListener(IGameUpdatable listener)
         {
+            if (!_updateListeners.Contains(listener))
+                return;
+            
             _updateListeners.Remove(listener);
         }
 

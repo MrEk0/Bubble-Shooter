@@ -53,14 +53,17 @@ namespace Game.Controllers
             if (!_canShoot)
                 return;
 
+            var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + 90f;
+            if ((angle >= 0f && angle > _data.AimLineAngleRange.x) || (angle < 0f && angle < _data.AimLineAngleRange.y))
+                return;
+
             _canShoot = false;
 
-            var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + 90f;
             var rotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
 
             var ball = _fireBallFactory.ObjectPool.Get();
             ball.Setup(_data.GetBallSprite(_levelController.CurrentBallType), _levelController.CurrentBallType);
-            
+
             var tr = ball.transform;
             tr.position = _position;
             tr.rotation = rotation;
@@ -68,7 +71,7 @@ namespace Game.Controllers
             _levelController.ChangeBallType();
             _fireBall.Setup(_data.GetBallSprite(_levelController.CurrentBallType), _levelController.CurrentBallType);
         }
-        
+
         private void OnFireBallCollided(Ball ball, Collision2D collision)
         {
             _canShoot = true;

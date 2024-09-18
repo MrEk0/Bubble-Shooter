@@ -19,6 +19,7 @@ MonoBehaviour:
   _minBallsCountToRelease: 3
   _ballVelocity: 10
   _levelRowCounts: 5
+  _aimLineAngleRange: {x: -100, y: 100}
   _ballSpacing: {x: 1, y: 1}
   _startPositionOffset: {x: 0.65, y: -0.65}
   _wallMask:

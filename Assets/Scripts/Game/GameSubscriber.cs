@@ -15,6 +15,9 @@ namespace Game
 
         public void RemoveListener(ISubscribable subscriber)
         {
+            if (!_subscribers.Contains(subscriber))
+                return;
+            
             subscriber.Unsubscribe();
             _subscribers.Remove(subscriber);
         }
