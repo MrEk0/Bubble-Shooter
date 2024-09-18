@@ -32,6 +32,8 @@ namespace Game.Controllers
 
         public void StartLevel()
         {
+            _staticBallFactory.ReleaseBalls(_staticBallFactory.CreatedBalls);
+            
             var startPosition = new Vector3(_walls.Bounds.min.x + _data.StartPositionOffset.x, _walls.Bounds.max.y + _data.StartPositionOffset.y, 0f);
             var maxBallsInRow = _data.BallSpacing.x <= 0f ? 0 : Mathf.FloorToInt((_walls.Bounds.size.x - _data.StartPositionOffset.x) / _data.BallSpacing.x) + 1;
 
@@ -80,7 +82,9 @@ namespace Game.Controllers
                 new(collisionBallPos.x + _data.BallSpacing.x * 0.5f, collisionBallPos.y + _data.BallSpacing.y, 0f),
                 new(collisionBallPos.x + _data.BallSpacing.x * 0.5f, collisionBallPos.y - _data.BallSpacing.y, 0f),
                 new(collisionBallPos.x - _data.BallSpacing.x * 0.5f, collisionBallPos.y + _data.BallSpacing.y, 0f),
-                new(collisionBallPos.x - _data.BallSpacing.x * 0.5f, collisionBallPos.y - _data.BallSpacing.y, 0f)
+                new(collisionBallPos.x - _data.BallSpacing.x * 0.5f, collisionBallPos.y - _data.BallSpacing.y, 0f),
+                new(collisionBallPos.x + _data.BallSpacing.x, collisionBallPos.y),
+                new(collisionBallPos.x - _data.BallSpacing.x, collisionBallPos.y)
             };
 
             var ball = _staticBallFactory.ObjectPool.Get();
@@ -92,13 +96,13 @@ namespace Game.Controllers
 
             GetNeighbors(typedBalls, ball.transform, maxDistance);
 
-            if (_data.MinBallsCountToRelease > _connectedBalls.Count)
-                return;
+            if (_data.MinBallsCountToRelease <= _connectedBalls.Count)
+            {
+                _staticBallFactory.ReleaseBalls(_connectedBalls);
+                _levelController.ChangeScore(_connectedBalls.Count);
+            }
 
-            _staticBallFactory.ReleaseBalls(_connectedBalls);
-
-            _levelController.ChangeScore(_connectedBalls.Count);
-            _levelController.CheckWinCondition(_staticBallFactory.GetActiveBalls);
+            _levelController.CheckGameState(_staticBallFactory.CreatedBalls);
         }
 
         private void GetNeighbors(IReadOnlyList<Ball> list, Transform ball, float maxDistance)

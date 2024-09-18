@@ -931,7 +931,6 @@ RectTransform:
   - {fileID: 493912939}
   - {fileID: 597952510}
   - {fileID: 105969893}
-  - {fileID: 1660136924}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1094,25 +1093,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &1660136924
-RectTransform:
+--- !u!4 &1660136924
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1660136923}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1153460879}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1660136925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1125,7 +1120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fef215431f21874bb2fc1529d22cbed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _windowsParent: {fileID: 1660136924}
+  _windowsParent: {fileID: 1153460879}
   _windowsPrefabs:
   - {fileID: 7146723113394149746, guid: ac362ba5344e5a34b81c6ce010945518, type: 3}
 --- !u!1 &1666652055
@@ -1338,3 +1333,4 @@ SceneRoots:
   - {fileID: 513981059}
   - {fileID: 1153460879}
   - {fileID: 1666652058}
+  - {fileID: 1660136924}

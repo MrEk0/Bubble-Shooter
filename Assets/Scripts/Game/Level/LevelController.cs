@@ -36,12 +36,7 @@ namespace Game.Level
 
             _windowSystem = serviceLocator.GetService<WindowSystem>();
             _data = serviceLocator.GetService<GameSettingsData>();
-            var gameSubscriber = serviceLocator.GetService<GameSubscriber>();
-            var gameWindow = serviceLocator.GetService<GameWindow>();
 
-            gameWindow.Init(_serviceLocator);
-            gameSubscriber.AddListener(gameWindow);
-            
             var levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
 
             _availableBalls.AddRange(levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList());
@@ -53,6 +48,12 @@ namespace Game.Level
 
         public void StartLevel()
         {
+            var gameSubscriber = _serviceLocator.GetService<GameSubscriber>();
+            var gameWindow = _serviceLocator.GetService<GameWindow>();
+
+            gameWindow.Init(_serviceLocator);
+            gameSubscriber.AddListener(gameWindow);
+            
             _serviceLocator.GetService<StaticBallsController>().StartLevel();
 
             ChangeScoreEvent(_currentScore);
@@ -76,25 +77,26 @@ namespace Game.Level
             ChangeShotsCountEvent(NextBallType, _leftShotCount);
         }
 
-        public void CheckWinCondition(IReadOnlyList<Ball> activeBalls)
+        public void CheckGameState(IReadOnlyList<Ball> balls)//todo get first row balls
         {
-            var firstRowY = activeBalls.Max(o => o.transform.position.y);
+            var activeBalls = balls.Where(o => o.gameObject.activeSelf).ToList();
+            var firstRowY = balls.Max(o => o.transform.position.y);
+            var firstRowBalls = balls.Where(ball => Math.Abs(ball.transform.position.y - firstRowY) < Mathf.Epsilon).ToList();
             var firstRowLeftBall = activeBalls.Where(activeBall => Math.Abs(activeBall.transform.position.y - firstRowY) < Mathf.Epsilon).ToList();
+            var rate = firstRowBalls.Count == 0 ? 0 : (float)firstRowLeftBall.Count / firstRowBalls.Count;
 
-            if (firstRowLeftBall.Count > _data.FirstRowVictoryBallsRate)
-                return;
-            
-            var setup = new EndGameWindowSetup
+            if (rate <= _data.FirstRowVictoryBallsRate)
             {
-                PlayAgainCallback = Replay,
-                Score = _currentScore,
-                WindowSystem = _windowSystem
-            };
-            _windowSystem.Open<GameWinWindow, EndGameWindowSetup>(setup);
-        }
+                var endGameWindowSetup = new EndGameWindowSetup
+                {
+                    PlayAgainCallback = Replay,
+                    Score = _currentScore,
+                    WindowSystem = _windowSystem
+                };
+                _windowSystem.Open<GameWinWindow, EndGameWindowSetup>(endGameWindowSetup);
+                return;
+            }
 
-        public void CheckLoseCondition()
-        {
             if (_leftShotCount > 0)
                 return;
 
@@ -115,7 +117,10 @@ namespace Game.Level
             CurrentBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
             _leftShotCount = _data.LevelShotsCount;
             
-            StartLevel();
+            _serviceLocator.GetService<StaticBallsController>().StartLevel();
+
+            ChangeScoreEvent(_currentScore);
+            ChangeShotsCountEvent(NextBallType, _leftShotCount);
         }
     }
 }

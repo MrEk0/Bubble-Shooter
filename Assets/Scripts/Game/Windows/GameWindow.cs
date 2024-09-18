@@ -18,6 +18,7 @@ namespace Game.Windows
         [SerializeField] private Image _nextFireBallImage;
         
         [CanBeNull] private ServiceLocator _serviceLocator;
+        [CanBeNull] private LevelController _levelController;
         [CanBeNull] private GameSettingsData _gameSettingsData;
 
         public event Action OnExitClickEvent = delegate { };
@@ -38,6 +39,7 @@ namespace Game.Windows
             if (_serviceLocator == null)
                 return;
 
+            _levelController = _serviceLocator.GetService<LevelController>();
             _gameSettingsData = _serviceLocator.GetService<GameSettingsData>();
             if (_gameSettingsData == null)
                 return;
@@ -47,22 +49,20 @@ namespace Game.Windows
 
         public void Subscribe()
         {
-            if (_serviceLocator == null)
+            if (_levelController == null)
                 return;
             
-            var levelController = _serviceLocator.GetService<LevelController>();
-            levelController.ChangeScoreEvent += OnScoreChanged;
-            levelController.ChangeShotsCountEvent += OnShotCountChanged;
+            _levelController.ChangeScoreEvent += OnScoreChanged;
+            _levelController.ChangeShotsCountEvent += OnShotCountChanged;
         }
 
         public void Unsubscribe()
         {
-            if (_serviceLocator == null)
+            if (_levelController == null)
                 return;
             
-            var levelController = _serviceLocator.GetService<LevelController>();
-            levelController.ChangeScoreEvent -= OnScoreChanged;
-            levelController.ChangeShotsCountEvent -= OnShotCountChanged;
+            _levelController.ChangeScoreEvent -= OnScoreChanged;
+            _levelController.ChangeShotsCountEvent -= OnShotCountChanged;
         }
         
         private void OnExitClicked()
