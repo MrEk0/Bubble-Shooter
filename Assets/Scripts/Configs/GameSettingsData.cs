@@ -4,7 +4,6 @@ using Enums;
 using Interfaces;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Configs
 {
@@ -17,7 +16,8 @@ namespace Configs
             public BallEnum Type;
             public Sprite Sprite;
         }
-        
+
+        [SerializeField] private string _linkedInURL;
         [SerializeField] private int _scorePerBall;
         [SerializeField] private int _levelShotsCount;
         [SerializeField] private int _minBallsCountToRelease;
@@ -29,6 +29,7 @@ namespace Configs
         [SerializeField] private LayerMask _ballMask;
         [SerializeField] private BallSpriteSettings[] _ballSpriteSettings = Array.Empty<BallSpriteSettings>();
 
+        public string LinkedInURL => _linkedInURL;
         public int ScorePerBall => _scorePerBall;
         public int LevelShotsCount => _levelShotsCount;
         public int MinBallsCountToRelease => _minBallsCountToRelease;

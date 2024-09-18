@@ -8,9 +8,9 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace Game.Pools
+namespace Game.Factories
 {
-    public class FireBallPoolCreator : MonoBehaviour, IServisable
+    public class FireBallFactory : MonoBehaviour, IServisable
     {
         [Serializable]
         public class FireBallSettings
@@ -37,9 +37,8 @@ namespace Game.Pools
             _gameUpdater = serviceLocator.GetService<GameUpdater>();
             _gameSubscriber = serviceLocator.GetService<GameSubscriber>();
             _serviceLocator = serviceLocator;
-
-            var data = serviceLocator.GetService<GameSettingsData>();
-            _ballVelocity = data.BallVelocity;
+            
+            _ballVelocity = serviceLocator.GetService<GameSettingsData>().BallVelocity;
 
             ObjectPool = new ObjectPool<Ball>(CreateProjectile, OnGetFromPool, OnReleaseToPool, OnDestroyPooledObject);
         }

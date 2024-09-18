@@ -1,6 +1,7 @@
 using Configs;
-using Game.Pools;
-using Game.Spawners;
+using Game.Balls;
+using Game.Controllers;
+using Game.Factories;
 using Game.Windows;
 using UnityEngine;
 
@@ -8,16 +9,15 @@ namespace Game.Level
 {
     public class LevelInitializer : MonoBehaviour
     {
-        [SerializeField] private DragButton _dragButton;
-        [SerializeField] private LineRenderer _lineRenderer;
-        [SerializeField] private SpriteRenderer _spriteRenderer;
-        [SerializeField] private Transform _fireBall;
+        [SerializeField] private GameSettingsData _gameSettingsData;
         [SerializeField] private Camera _mainCamera;
-        [SerializeField] private FireBallPoolCreator _fireBallPoolCreator;
-        [SerializeField] private StaticBallPoolCreator _staticBallPoolCreator;
+        [SerializeField] private Ball _fireBall;
+        [SerializeField] private LineRenderer _lineRenderer;
+        [SerializeField] private DragButton _dragButton;
+        [SerializeField] private FireBallFactory _fireBallFactory;
+        [SerializeField] private StaticBallFactory _staticBallFactory;
         [SerializeField] private GameUpdater _gameUpdater;
         [SerializeField] private Walls _walls;
-        [SerializeField] private GameSettingsData _gameSettingsData;
         [SerializeField] private LevelDataLoader _levelDataLoader;
         [SerializeField] private GameWindow _gameWindow;
         [SerializeField] private WindowSystem _windowSystem;
@@ -29,35 +29,34 @@ namespace Game.Level
         {
             _walls.SetupWalls(_mainCamera);
 
-            _gameSubscriber = new GameSubscriber();
             _serviceLocator = new ServiceLocator();
+            _gameSubscriber = new GameSubscriber();
 
-            _serviceLocator.AddService(_fireBallPoolCreator);
-            _serviceLocator.AddService(_staticBallPoolCreator);
+            _serviceLocator.AddService(_gameSubscriber);
             _serviceLocator.AddService(_gameUpdater);
             _serviceLocator.AddService(_gameSettingsData);
+            _serviceLocator.AddService(_fireBallFactory);
+            _serviceLocator.AddService(_staticBallFactory);
             _serviceLocator.AddService(_walls);
             _serviceLocator.AddService(_levelDataLoader);
-            _serviceLocator.AddService(_gameSubscriber);
             _serviceLocator.AddService(_dragButton);
             _serviceLocator.AddService(_gameWindow);
             _serviceLocator.AddService(_windowSystem);
 
-            _fireBallPoolCreator.Init(_serviceLocator);
-            _staticBallPoolCreator.Init();
+            _fireBallFactory.Init(_serviceLocator);
+            _staticBallFactory.Init();
 
-            var levelController = new LevelController(_serviceLocator, _spriteRenderer);
-            _serviceLocator.AddService(levelController);
+            var levelController = new LevelController(_serviceLocator);
 
-            var ballSpawner = new FireBallSpawner(_serviceLocator, _fireBall);
+            var ballSpawner = new FireBallsController(_serviceLocator, _fireBall);
             _gameSubscriber.AddListener(ballSpawner);
             _serviceLocator.AddService(ballSpawner);
 
-            var staticBallSpawner = new StaticBallSpawner(_serviceLocator);
+            var staticBallSpawner = new StaticBallsController(_serviceLocator);
             _gameSubscriber.AddListener(staticBallSpawner);
             _serviceLocator.AddService(staticBallSpawner);
 
-            var line = new LineRendererActivator(_dragButton, _fireBall, _lineRenderer);
+            var line = new LineRendererActivator(_dragButton, _fireBall.transform, _lineRenderer);
             _gameSubscriber.AddListener(line);
 
             levelController.StartLevel();

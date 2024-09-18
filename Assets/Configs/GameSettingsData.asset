@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16ecbe1cb0ddf634eb534ecfe0539435, type: 3}
   m_Name: GameSettingsData
   m_EditorClassIdentifier: 
-  _scorePerBall: 5
+  _linkedInURL: https://www.linkedin.com/in/aleksandr-kuznetsov-2b7984190/
+  _scorePerBall: 10
   _levelShotsCount: 10
   _minBallsCountToRelease: 3
   _ballVelocity: 5

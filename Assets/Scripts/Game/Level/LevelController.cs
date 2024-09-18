@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Configs;
 using Enums;
-using Game.Spawners;
+using Game.Balls;
+using Game.Controllers;
+using Game.Factories;
 using Game.Windows;
 using Interfaces;
 using UnityEngine;
@@ -11,12 +13,12 @@ using Random = UnityEngine.Random;
 
 namespace Game.Level
 {
-    public class LevelController : IServisable
+    public class LevelController : IServisable, ISubscribable
     {
         private readonly GameSettingsData _data;
         private readonly List<BallEnum> _availableBalls = new();
         private readonly ServiceLocator _serviceLocator;
-        private readonly SpriteRenderer _spriteRenderer;
+        private readonly FireBallFactory _fireBallFactory;
         private readonly WindowSystem _windowSystem;
 
         private int _currentScore;
@@ -30,15 +32,19 @@ namespace Game.Level
         public BallEnum CurrentBallType { get; private set; }
         public bool IsEnoughShots => _leftShotCount > 0;
 
-        public LevelController(ServiceLocator serviceLocator, SpriteRenderer spriteRenderer)
+        public LevelController(ServiceLocator serviceLocator)
         {
             _serviceLocator = serviceLocator;
-            _spriteRenderer = spriteRenderer;
 
             _windowSystem = serviceLocator.GetService<WindowSystem>();
+            _fireBallFactory = serviceLocator.GetService<FireBallFactory>();
             _data = serviceLocator.GetService<GameSettingsData>();
 
             var levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
+            var gameSubscriber = serviceLocator.GetService<GameSubscriber>();
+
+            gameSubscriber.AddListener(this);
+            serviceLocator.AddService(this);
 
             _availableBalls.AddRange(levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList());
 
@@ -46,17 +52,25 @@ namespace Game.Level
             CurrentBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
             _leftShotCount = _data.LevelShotsCount;
         }
+        
+        public void Subscribe()
+        {
+            _fireBallFactory.CollisionEvent += OnFireBallCollided;
+        }
+
+        public void Unsubscribe()
+        {
+            _fireBallFactory.CollisionEvent += OnFireBallCollided;
+        }
 
         public void StartLevel()
         {
-            _serviceLocator.GetService<StaticBallSpawner>().StartLevel();
+            _serviceLocator.GetService<StaticBallsController>().StartLevel();
             var gameSubscriber = _serviceLocator.GetService<GameSubscriber>();
             var gameWindow = _serviceLocator.GetService<GameWindow>();
 
             gameWindow.Init(_serviceLocator);
             gameSubscriber.AddListener(gameWindow);
-
-            _spriteRenderer.sprite = _data.GetBallSprite(CurrentBallType);
 
             ChangeScoreEvent(_currentScore);
             ChangeShotsCountEvent(NextBallType, _leftShotCount);
@@ -74,21 +88,22 @@ namespace Game.Level
             CurrentBallType = NextBallType;
             NextBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
 
-            _spriteRenderer.sprite = _data.GetBallSprite(CurrentBallType);
-
             _leftShotCount--;
 
-            if (_leftShotCount <= 0)
-            {
-                var setup = new EndGameWindowSetup
-                {
-                    Score = _currentScore,
-                    WindowSystem = _windowSystem
-                };
-                _windowSystem.Open<GameOverWindow, EndGameWindowSetup>(setup);
-            }
-
             ChangeShotsCountEvent(NextBallType, _leftShotCount);
+        }
+        
+        private void OnFireBallCollided(Ball ball, Collision2D collision)
+        {
+            if (_leftShotCount > 0) 
+                return;
+            
+            var setup = new EndGameWindowSetup
+            {
+                Score = _currentScore,
+                WindowSystem = _windowSystem
+            };
+            _windowSystem.Open<GameOverWindow, EndGameWindowSetup>(setup);
         }
     }
 }

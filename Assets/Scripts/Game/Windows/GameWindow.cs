@@ -1,3 +1,4 @@
+using System;
 using Configs;
 using Enums;
 using Game.Level;
@@ -18,6 +19,8 @@ namespace Game.Windows
         
         [CanBeNull] private ServiceLocator _serviceLocator;
         [CanBeNull] private GameSettingsData _gameSettingsData;
+
+        public event Action OnExitClickEvent = delegate { };
 
         private void OnEnable()
         {
@@ -64,7 +67,7 @@ namespace Game.Windows
         
         private void OnExitClicked()
         {
-            //todo return to main menu
+            OnExitClickEvent();
         }
 
         private void OnScoreChanged(int score)

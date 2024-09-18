@@ -2,32 +2,32 @@ using System.Collections.Generic;
 using System.Linq;
 using Configs;
 using Game.Balls;
+using Game.Factories;
 using Game.Level;
-using Game.Pools;
 using Interfaces;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Game.Spawners
+namespace Game.Controllers
 {
-    public class StaticBallSpawner : ISubscribable, IServisable
+    public class StaticBallsController : ISubscribable, IServisable
     {
         private readonly LevelDataLoader _levelDataLoader;
         private readonly LevelController _levelController;
-        private readonly StaticBallPoolCreator _staticBallPoolCreator;
-        private readonly FireBallPoolCreator _fireBallPoolCreator;
+        private readonly StaticBallFactory _staticBallFactory;
+        private readonly FireBallFactory _fireBallFactory;
         private readonly GameSettingsData _data;
         private readonly Walls _walls;
         private readonly List<Ball> _connectedBalls = new();
 
-        public StaticBallSpawner(ServiceLocator serviceLocator)
+        public StaticBallsController(ServiceLocator serviceLocator)
         {
             _levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
             _levelController = serviceLocator.GetService<LevelController>();
             _walls = serviceLocator.GetService<Walls>();
             _data = serviceLocator.GetService<GameSettingsData>();
-            _staticBallPoolCreator = serviceLocator.GetService<StaticBallPoolCreator>();
-            _fireBallPoolCreator = serviceLocator.GetService<FireBallPoolCreator>();
+            _staticBallFactory = serviceLocator.GetService<StaticBallFactory>();
+            _fireBallFactory = serviceLocator.GetService<FireBallFactory>();
         }
 
         public void StartLevel()
@@ -46,27 +46,27 @@ namespace Game.Spawners
                 {
                     var ballType = availableBalls[Random.Range(0, availableBalls.Count)];
 
-                    var ball = _staticBallPoolCreator.ObjectPool.Get();
+                    var ball = _staticBallFactory.ObjectPool.Get();
                     ball.transform.position = new Vector3(rowStartPosition.x + _data.BallSpacing.x * j, rowStartPosition.y - _data.BallSpacing.y * i, 0);
-                    ball.Init(_data.GetBallSprite(ballType), ballType);
+                    ball.Setup(_data.GetBallSprite(ballType), ballType);
                 }
             }
         }
 
         public void Subscribe()
         {
-            if (_fireBallPoolCreator == null)
+            if (_fireBallFactory == null)
                 return;
 
-            _fireBallPoolCreator.CollisionEvent += OnBallCollided;
+            _fireBallFactory.CollisionEvent += OnBallCollided;
         }
 
         public void Unsubscribe()
         {
-            if (_fireBallPoolCreator == null)
+            if (_fireBallFactory == null)
                 return;
 
-            _fireBallPoolCreator.CollisionEvent -= OnBallCollided;
+            _fireBallFactory.CollisionEvent -= OnBallCollided;
         }
 
         private void OnBallCollided(Ball collidedBall, Collision2D collision)
@@ -83,11 +83,11 @@ namespace Game.Spawners
                 new(collisionBallPos.x - _data.BallSpacing.x * 0.5f, collisionBallPos.y - _data.BallSpacing.y, 0f)
             };
 
-            var ball = _staticBallPoolCreator.ObjectPool.Get();
+            var ball = _staticBallFactory.ObjectPool.Get();
             ball.transform.position = possiblePositions.OrderBy(o => Vector3.Distance(o, collidedPos)).FirstOrDefault();
-            ball.Init(_data.GetBallSprite(collidedBall.Type), collidedBall.Type);
+            ball.Setup(_data.GetBallSprite(collidedBall.Type), collidedBall.Type);
 
-            var typedBalls = _staticBallPoolCreator.CreatedBalls.Where(o => o.Type == collidedBall.Type).ToList();
+            var typedBalls = _staticBallFactory.CreatedBalls.Where(o => o.Type == collidedBall.Type).ToList();
             var maxDistance = new Vector3(_data.BallSpacing.x * 0.5f, _data.BallSpacing.y).magnitude;
 
             GetNeighbors(typedBalls, ball.transform, maxDistance);
@@ -95,7 +95,7 @@ namespace Game.Spawners
             if (_data.MinBallsCountToRelease > _connectedBalls.Count)
                 return;
 
-            _staticBallPoolCreator.ReleaseBalls(_connectedBalls);
+            _staticBallFactory.ReleaseBalls(_connectedBalls);
 
             _levelController.AddScore(_connectedBalls.Count);
         }

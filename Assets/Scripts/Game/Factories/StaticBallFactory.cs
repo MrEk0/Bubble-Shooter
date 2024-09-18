@@ -4,9 +4,9 @@ using Interfaces;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace Game.Pools
+namespace Game.Factories
 {
-    public class StaticBallPoolCreator : MonoBehaviour, IServisable
+    public class StaticBallFactory : MonoBehaviour, IServisable
     {
         [SerializeField] private Ball _ballPrefab;
         

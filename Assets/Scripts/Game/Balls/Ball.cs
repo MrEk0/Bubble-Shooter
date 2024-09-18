@@ -12,7 +12,7 @@ namespace Game.Balls
 
         public BallEnum Type { get; private set; }
 
-        public void Init(Sprite sprite, BallEnum type)
+        public void Setup(Sprite sprite, BallEnum type)
         {
             _spriteRenderer.sprite = sprite;
             Type = type;
