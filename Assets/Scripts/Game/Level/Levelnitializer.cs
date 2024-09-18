@@ -47,6 +47,7 @@ namespace Game.Level
             _staticBallFactory.Init();
 
             var levelController = new LevelController(_serviceLocator);
+            _serviceLocator.AddService(levelController);
 
             var ballSpawner = new FireBallsController(_serviceLocator, _fireBall);
             _gameSubscriber.AddListener(ballSpawner);

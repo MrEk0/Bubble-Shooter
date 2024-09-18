@@ -5,7 +5,6 @@ using Configs;
 using Enums;
 using Game.Balls;
 using Game.Controllers;
-using Game.Factories;
 using Game.Windows;
 using Interfaces;
 using UnityEngine;
@@ -13,12 +12,11 @@ using Random = UnityEngine.Random;
 
 namespace Game.Level
 {
-    public class LevelController : IServisable, ISubscribable
+    public class LevelController : IServisable
     {
         private readonly GameSettingsData _data;
         private readonly List<BallEnum> _availableBalls = new();
         private readonly ServiceLocator _serviceLocator;
-        private readonly FireBallFactory _fireBallFactory;
         private readonly WindowSystem _windowSystem;
 
         private int _currentScore;
@@ -37,14 +35,14 @@ namespace Game.Level
             _serviceLocator = serviceLocator;
 
             _windowSystem = serviceLocator.GetService<WindowSystem>();
-            _fireBallFactory = serviceLocator.GetService<FireBallFactory>();
             _data = serviceLocator.GetService<GameSettingsData>();
-
-            var levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
             var gameSubscriber = serviceLocator.GetService<GameSubscriber>();
+            var gameWindow = serviceLocator.GetService<GameWindow>();
 
-            gameSubscriber.AddListener(this);
-            serviceLocator.AddService(this);
+            gameWindow.Init(_serviceLocator);
+            gameSubscriber.AddListener(gameWindow);
+            
+            var levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
 
             _availableBalls.AddRange(levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList());
 
@@ -52,31 +50,16 @@ namespace Game.Level
             CurrentBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
             _leftShotCount = _data.LevelShotsCount;
         }
-        
-        public void Subscribe()
-        {
-            _fireBallFactory.CollisionEvent += OnFireBallCollided;
-        }
-
-        public void Unsubscribe()
-        {
-            _fireBallFactory.CollisionEvent += OnFireBallCollided;
-        }
 
         public void StartLevel()
         {
             _serviceLocator.GetService<StaticBallsController>().StartLevel();
-            var gameSubscriber = _serviceLocator.GetService<GameSubscriber>();
-            var gameWindow = _serviceLocator.GetService<GameWindow>();
-
-            gameWindow.Init(_serviceLocator);
-            gameSubscriber.AddListener(gameWindow);
 
             ChangeScoreEvent(_currentScore);
             ChangeShotsCountEvent(NextBallType, _leftShotCount);
         }
 
-        public void AddScore(int releasedBalls)
+        public void ChangeScore(int releasedBalls)
         {
             _currentScore += _data.ScorePerBall * releasedBalls;
 
@@ -92,18 +75,47 @@ namespace Game.Level
 
             ChangeShotsCountEvent(NextBallType, _leftShotCount);
         }
-        
-        private void OnFireBallCollided(Ball ball, Collision2D collision)
+
+        public void CheckWinCondition(IReadOnlyList<Ball> activeBalls)
         {
-            if (_leftShotCount > 0) 
+            var firstRowY = activeBalls.Max(o => o.transform.position.y);
+            var firstRowLeftBall = activeBalls.Where(activeBall => Math.Abs(activeBall.transform.position.y - firstRowY) < Mathf.Epsilon).ToList();
+
+            if (firstRowLeftBall.Count > _data.FirstRowVictoryBallsRate)
                 return;
             
             var setup = new EndGameWindowSetup
             {
+                PlayAgainCallback = Replay,
+                Score = _currentScore,
+                WindowSystem = _windowSystem
+            };
+            _windowSystem.Open<GameWinWindow, EndGameWindowSetup>(setup);
+        }
+
+        public void CheckLoseCondition()
+        {
+            if (_leftShotCount > 0)
+                return;
+
+            var setup = new EndGameWindowSetup
+            {
+                PlayAgainCallback = Replay,
                 Score = _currentScore,
                 WindowSystem = _windowSystem
             };
             _windowSystem.Open<GameOverWindow, EndGameWindowSetup>(setup);
+        }
+
+        private void Replay()
+        {
+            _currentScore = 0;
+            
+            NextBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
+            CurrentBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
+            _leftShotCount = _data.LevelShotsCount;
+            
+            StartLevel();
         }
     }
 }

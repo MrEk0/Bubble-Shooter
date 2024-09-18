@@ -97,7 +97,8 @@ namespace Game.Controllers
 
             _staticBallFactory.ReleaseBalls(_connectedBalls);
 
-            _levelController.AddScore(_connectedBalls.Count);
+            _levelController.ChangeScore(_connectedBalls.Count);
+            _levelController.CheckWinCondition(_staticBallFactory.GetActiveBalls);
         }
 
         private void GetNeighbors(IReadOnlyList<Ball> list, Transform ball, float maxDistance)

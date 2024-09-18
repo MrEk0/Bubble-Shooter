@@ -18,6 +18,7 @@ namespace Configs
         }
 
         [SerializeField] private string _linkedInURL;
+        [SerializeField] private float _firstRowVoctoryBallsRate;
         [SerializeField] private int _scorePerBall;
         [SerializeField] private int _levelShotsCount;
         [SerializeField] private int _minBallsCountToRelease;
@@ -30,6 +31,7 @@ namespace Configs
         [SerializeField] private BallSpriteSettings[] _ballSpriteSettings = Array.Empty<BallSpriteSettings>();
 
         public string LinkedInURL => _linkedInURL;
+        public float FirstRowVictoryBallsRate => _firstRowVoctoryBallsRate;
         public int ScorePerBall => _scorePerBall;
         public int LevelShotsCount => _levelShotsCount;
         public int MinBallsCountToRelease => _minBallsCountToRelease;

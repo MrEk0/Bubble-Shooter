@@ -10,6 +10,8 @@ namespace Game.Windows
         [SerializeField] private Transform _windowsParent;
         [SerializeField] private ASimpleWindow[] _windowsPrefabs;
 
+        public event Action<ASimpleWindow> CloseWindowEvent = delegate { };
+
         private readonly Dictionary<Type, ASimpleWindow> _windows = new();
         private readonly Dictionary<Type, ASimpleWindow> _openedWindows = new();
         
@@ -45,6 +47,8 @@ namespace Game.Windows
 
             _openedWindows.Remove(windowType);
 
+            CloseWindowEvent(window);
+            
             Destroy(window.gameObject);
         }
     }

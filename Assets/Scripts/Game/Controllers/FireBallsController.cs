@@ -71,6 +71,8 @@ namespace Game.Controllers
         
         private void OnFireBallCollided(Ball ball, Collision2D collision)
         {
+            _levelController.CheckLoseCondition();
+            
             _canShoot = true;
         }
     }

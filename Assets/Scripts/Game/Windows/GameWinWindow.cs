@@ -1,3 +1,4 @@
+using System;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace Game.Windows
         [SerializeField] private Button _playAgainButton;
 
         [CanBeNull] private WindowSystem _windowSystem;
+        [CanBeNull] private Action _playAgainCallback;
 
         private void OnEnable()
         {
@@ -24,6 +26,7 @@ namespace Game.Windows
 
         public override void Init(EndGameWindowSetup windowSetup)
         {
+            _playAgainCallback = windowSetup.PlayAgainCallback;
             _windowSystem = windowSetup.WindowSystem;
             _scoreText.text = windowSetup.Score.ToString();
         }
@@ -34,6 +37,8 @@ namespace Game.Windows
                 return;
             
             _windowSystem.Close<GameWinWindow>();
+            
+            _playAgainCallback?.Invoke();
         }
     }
 }

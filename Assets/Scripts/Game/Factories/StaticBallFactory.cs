@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Game.Balls;
 using Interfaces;
 using UnityEngine;
@@ -10,10 +11,12 @@ namespace Game.Factories
     {
         [SerializeField] private Ball _ballPrefab;
         
+        private readonly List<Ball> _createdBalls = new();
+        
         public IObjectPool<Ball> ObjectPool { get; private set; }
 
         public IReadOnlyList<Ball> CreatedBalls => _createdBalls;
-        private readonly List<Ball> _createdBalls = new();
+        public IReadOnlyList<Ball> GetActiveBalls => _createdBalls.Where(o => o.gameObject.activeSelf).ToList();
 
         public void Init()
         {
