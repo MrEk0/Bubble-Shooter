@@ -21,6 +21,7 @@ namespace Game.Controllers
         [CanBeNull] private readonly Walls _walls;
         
         private readonly List<Ball> _connectedBalls = new();
+        private readonly Dictionary<float, List<Ball>> _balls;
 
         public StaticBallsController(ServiceLocator serviceLocator)
         {
@@ -36,9 +37,10 @@ namespace Game.Controllers
         {
             if (_staticBallFactory == null || _walls == null || _levelDataLoader == null || _data == null)
                 return;
-            
-            _staticBallFactory.ReleaseBalls(_staticBallFactory.CreatedBalls);
-            
+
+            _staticBallFactory.ReleaseBalls(_balls.Values.SelectMany(o => o));
+            _balls.Clear();
+
             var startPosition = new Vector3(_walls.Bounds.min.x + _data.StartPositionOffset.x, _walls.Bounds.max.y + _data.StartPositionOffset.y, 0f);
             var maxBallsInRow = _data.BallSpacing.x <= 0f ? 0 : Mathf.FloorToInt((_walls.Bounds.size.x - _data.StartPositionOffset.x) / _data.BallSpacing.x) + 1;
 
@@ -49,6 +51,8 @@ namespace Game.Controllers
                 var rowBalls = i % 2 != 0 ? maxBallsInRow - 1 : maxBallsInRow;
                 var rowStartPosition = i % 2 != 0 ? new Vector3(startPosition.x + _data.BallSpacing.x * 0.5f, startPosition.y, 0f) : startPosition;
 
+                var ballsList = new List<Ball>();
+
                 for (var j = 0; j < rowBalls; j++)
                 {
                     var ballType = availableBalls[Random.Range(0, availableBalls.Count)];
@@ -56,7 +60,11 @@ namespace Game.Controllers
                     var ball = _staticBallFactory.ObjectPool.Get();
                     ball.transform.position = new Vector3(rowStartPosition.x + _data.BallSpacing.x * j, rowStartPosition.y - _data.BallSpacing.y * i, 0);
                     ball.Setup(_data.GetBallSprite(ballType), ballType);
+
+                    ballsList.Add(ball);
                 }
+
+                _balls.Add(rowStartPosition.y - _data.BallSpacing.y * i, ballsList);
             }
         }
 
@@ -95,13 +103,20 @@ namespace Game.Controllers
                 new(collisionBallPos.x - _data.BallSpacing.x, collisionBallPos.y)
             };
 
+            var ballPosition = possiblePositions.OrderBy(o => Vector3.Distance(o, collidedPos)).FirstOrDefault();
+            
             var ball = _staticBallFactory.ObjectPool.Get();
-            ball.transform.position = possiblePositions.OrderBy(o => Vector3.Distance(o, collidedPos)).FirstOrDefault();
+            ball.transform.position = ballPosition;
             ball.Setup(_data.GetBallSprite(collidedBall.Type), collidedBall.Type);
 
-            var typedBalls = _staticBallFactory.CreatedBalls.Where(o => o.Type == collidedBall.Type).ToList();
-            var maxDistance = new Vector3(_data.BallSpacing.x * 0.5f, _data.BallSpacing.y).magnitude;
+            if (_balls.TryGetValue(ballPosition.y, out var ballsList))
+                ballsList.Add(ball);
+            else
+                _balls.Add(ballPosition.y, new List<Ball> { ball });
 
+            var typedBalls = _balls.Values.SelectMany(o => o).Where(o => o.Type == collidedBall.Type).ToList();
+            var maxDistance = new Vector3(_data.BallSpacing.x * 0.5f, _data.BallSpacing.y).magnitude;
+            
             GetNeighbors(typedBalls, ball.transform, maxDistance);
 
             if (_data.MinBallsCountToRelease <= _connectedBalls.Count)
@@ -110,7 +125,7 @@ namespace Game.Controllers
                 _levelController.ChangeScore(_connectedBalls.Count);
             }
 
-            _levelController.CheckGameState(_staticBallFactory.CreatedBalls);
+            _levelController.CheckGameState(_balls);
         }
 
         private void GetNeighbors(IReadOnlyList<Ball> list, Transform ball, float maxDistance)

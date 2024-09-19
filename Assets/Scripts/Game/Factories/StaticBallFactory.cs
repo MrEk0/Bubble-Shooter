@@ -9,10 +9,6 @@ namespace Game.Factories
     public class StaticBallFactory : BallFactory
     {
         [SerializeField] private Ball _ballPrefab;
-        
-        private readonly List<Ball> _createdBalls = new();
-
-        public IReadOnlyList<Ball> CreatedBalls => _createdBalls;
 
         public void Init()
         {
@@ -28,14 +24,12 @@ namespace Game.Factories
         protected override Ball CreateProjectile()
         {
             var ball = Instantiate(_ballPrefab, transform);
-            _createdBalls.Add(ball);
-            
+
             return ball;
         }
 
         protected override void OnDestroyPooledObject(Ball pooledObject)
         {
-            _createdBalls.Remove(pooledObject);
             Destroy(pooledObject.gameObject);
         }
     }

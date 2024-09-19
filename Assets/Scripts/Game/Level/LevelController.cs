@@ -8,7 +8,6 @@ using Game.Controllers;
 using Game.Windows;
 using Interfaces;
 using JetBrains.Annotations;
-using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Game.Level
@@ -87,15 +86,16 @@ namespace Game.Level
             ChangeShotsCountEvent(NextBallType, _leftShotCount);
         }
 
-        public void CheckGameState(IReadOnlyList<Ball> balls)
+        public void CheckGameState(Dictionary<float, List<Ball>> balls)
         {
             if (_windowSystem == null || _data == null)
                 return;
-            
-            var activeBalls = balls.Where(o => o.gameObject.activeSelf).ToList();
-            var firstRowY = balls.Max(o => o.transform.position.y);
-            var firstRowBalls = balls.Where(ball => Math.Abs(ball.transform.position.y - firstRowY) < Mathf.Epsilon).ToList();
-            var firstRowLeftBall = activeBalls.Where(activeBall => Math.Abs(activeBall.transform.position.y - firstRowY) < Mathf.Epsilon).ToList();
+
+            var firstRowKey = balls.Keys.Max();
+            if (!balls.TryGetValue(firstRowKey, out var firstRowBalls))
+                return;
+
+            var firstRowLeftBall = firstRowBalls.Where(o => o.gameObject.activeSelf).ToList();
             var rate = firstRowBalls.Count == 0 ? 0 : (float)firstRowLeftBall.Count / firstRowBalls.Count;
 
             if (rate <= _data.FirstRowVictoryBallsRate)
