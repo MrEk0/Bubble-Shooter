@@ -5,6 +5,7 @@ using Game.Balls;
 using Game.Factories;
 using Game.Level;
 using Interfaces;
+using JetBrains.Annotations;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -12,12 +13,13 @@ namespace Game.Controllers
 {
     public class StaticBallsController : ISubscribable, IServisable
     {
-        private readonly LevelDataLoader _levelDataLoader;
-        private readonly LevelController _levelController;
-        private readonly StaticBallFactory _staticBallFactory;
-        private readonly FireBallFactory _fireBallFactory;
-        private readonly GameSettingsData _data;
-        private readonly Walls _walls;
+        [CanBeNull] private readonly LevelDataLoader _levelDataLoader;
+        [CanBeNull] private readonly LevelController _levelController;
+        [CanBeNull] private readonly StaticBallFactory _staticBallFactory;
+        [CanBeNull] private readonly FireBallFactory _fireBallFactory;
+        [CanBeNull] private readonly GameSettingsData _data;
+        [CanBeNull] private readonly Walls _walls;
+        
         private readonly List<Ball> _connectedBalls = new();
 
         public StaticBallsController(ServiceLocator serviceLocator)
@@ -32,12 +34,15 @@ namespace Game.Controllers
 
         public void StartLevel()
         {
+            if (_staticBallFactory == null || _walls == null || _levelDataLoader == null || _data == null)
+                return;
+            
             _staticBallFactory.ReleaseBalls(_staticBallFactory.CreatedBalls);
             
             var startPosition = new Vector3(_walls.Bounds.min.x + _data.StartPositionOffset.x, _walls.Bounds.max.y + _data.StartPositionOffset.y, 0f);
             var maxBallsInRow = _data.BallSpacing.x <= 0f ? 0 : Mathf.FloorToInt((_walls.Bounds.size.x - _data.StartPositionOffset.x) / _data.BallSpacing.x) + 1;
 
-            var availableBalls = _levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList();
+            var availableBalls = _levelDataLoader.LevelSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList();
 
             for (var i = 0; i < _data.LevelRowCounts; i++)
             {
@@ -73,6 +78,9 @@ namespace Game.Controllers
 
         private void OnBallCollided(Ball collidedBall, Collision2D collision)
         {
+            if (_staticBallFactory == null || _levelController == null || _data == null)
+                return;
+            
             _connectedBalls.Clear();
 
             var collidedPos = collidedBall.transform.position;

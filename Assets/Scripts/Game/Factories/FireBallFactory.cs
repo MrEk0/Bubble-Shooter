@@ -57,7 +57,6 @@ namespace Game.Factories
                 
                 CollisionEvent(ball, other);
                 
-                //_gameUpdater.RemoveListener(movement);
                 ObjectPool.Release(ball);
             });
 

@@ -7,6 +7,7 @@ using Game.Balls;
 using Game.Controllers;
 using Game.Windows;
 using Interfaces;
+using JetBrains.Annotations;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -14,10 +15,11 @@ namespace Game.Level
 {
     public class LevelController : IServisable
     {
-        private readonly GameSettingsData _data;
+        [CanBeNull] private readonly GameSettingsData _data;
+        [CanBeNull] private readonly ServiceLocator _serviceLocator;
+        [CanBeNull] private readonly WindowSystem _windowSystem;
+        
         private readonly List<BallEnum> _availableBalls = new();
-        private readonly ServiceLocator _serviceLocator;
-        private readonly WindowSystem _windowSystem;
 
         private int _currentScore;
         private int _leftShotCount;
@@ -36,10 +38,12 @@ namespace Game.Level
 
             _windowSystem = serviceLocator.GetService<WindowSystem>();
             _data = serviceLocator.GetService<GameSettingsData>();
+            if (_data == null)
+                return;
 
             var levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
 
-            _availableBalls.AddRange(levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList());
+            _availableBalls.AddRange(levelDataLoader.LevelSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList());
 
             NextBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
             CurrentBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
@@ -48,6 +52,9 @@ namespace Game.Level
 
         public void StartLevel()
         {
+            if (_serviceLocator == null)
+                return;
+            
             var gameSubscriber = _serviceLocator.GetService<GameSubscriber>();
             var gameWindow = _serviceLocator.GetService<GameWindow>();
 
@@ -62,6 +69,9 @@ namespace Game.Level
 
         public void ChangeScore(int releasedBalls)
         {
+            if (_data == null)
+                return;
+            
             _currentScore += _data.ScorePerBall * releasedBalls;
 
             ChangeScoreEvent(_currentScore);
@@ -77,8 +87,11 @@ namespace Game.Level
             ChangeShotsCountEvent(NextBallType, _leftShotCount);
         }
 
-        public void CheckGameState(IReadOnlyList<Ball> balls)//todo get first row balls
+        public void CheckGameState(IReadOnlyList<Ball> balls)
         {
+            if (_windowSystem == null || _data == null)
+                return;
+            
             var activeBalls = balls.Where(o => o.gameObject.activeSelf).ToList();
             var firstRowY = balls.Max(o => o.transform.position.y);
             var firstRowBalls = balls.Where(ball => Math.Abs(ball.transform.position.y - firstRowY) < Mathf.Epsilon).ToList();
@@ -111,6 +124,9 @@ namespace Game.Level
 
         private void Replay()
         {
+            if (_serviceLocator == null || _data == null)
+                return;
+            
             _currentScore = 0;
             
             NextBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];

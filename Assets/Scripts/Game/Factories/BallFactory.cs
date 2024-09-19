@@ -9,7 +9,7 @@ namespace Game.Factories
     {
         public IObjectPool<Ball> ObjectPool { get; protected set; }
 
-        public bool CanRelease(Ball poolObject) => poolObject.gameObject.activeSelf;
+        protected bool CanRelease(Ball poolObject) => poolObject.gameObject.activeSelf;
 
         protected abstract Ball CreateProjectile();
         protected abstract void OnDestroyPooledObject(Ball pooledObject);

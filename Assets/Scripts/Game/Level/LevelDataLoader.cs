@@ -11,7 +11,7 @@ namespace Game.Level
     public class LevelDataLoader : MonoBehaviour, IServisable
     {
         [Serializable]
-        public class LevelSettings
+        public class LevelBallSettings
         {
             public BallEnum Type;
             public bool IsAvailable;
@@ -22,13 +22,13 @@ namespace Game.Level
 
         [SerializeField] private string _tableId = string.Empty;
         [SerializeField] private string _tableGid = "0";
-        [SerializeField] private List<LevelSettings> _rowSettings = new();
+        [SerializeField] private List<LevelBallSettings> _levelSettings = new();
 
-        public IEnumerable<LevelSettings> LevelRowSettings => _rowSettings;
+        public IEnumerable<LevelBallSettings> LevelSettings => _levelSettings;
 
         private void LoadData()
         {
-            _rowSettings.Clear();
+            _levelSettings.Clear();
 
             var text = new StringBuilder();
             text.Append(HttpHelper.HttpGet(string.Format(URL_PATTERN, _tableId, _tableGid), "text/csv"));
@@ -42,13 +42,13 @@ namespace Game.Level
                 {
                     if (index == 0 && Enum.TryParse<BallEnum>(line[i], out var result))
                     {
-                        _rowSettings.Add(new LevelSettings { Type = result, IsAvailable = false });
+                        _levelSettings.Add(new LevelBallSettings { Type = result, IsAvailable = false });
                         continue;
                     }
 
                     if (bool.TryParse(line[i], out var boolResult))
                     {
-                        _rowSettings[i - 1].IsAvailable = boolResult;
+                        _levelSettings[i - 1].IsAvailable = boolResult;
                     }
                 }
             });

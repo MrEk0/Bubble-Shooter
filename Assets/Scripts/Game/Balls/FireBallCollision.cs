@@ -10,7 +10,7 @@ namespace Game.Balls
     {
         private readonly int _wallMask;
         private readonly int _ballMask;
-        private readonly Transform _ownerTransform;
+        [CanBeNull] private readonly Transform _ownerTransform;
 
         [CanBeNull] private readonly Action<Collision2D> _collisionCallback;
 
@@ -26,6 +26,9 @@ namespace Game.Balls
 
         protected override void OnCollision(Collision2D collision)
         {
+            if (_ownerTransform == null)
+                return;
+            
             if (_wallMask == (_wallMask | (1 << collision.gameObject.layer)))
             {
                 var point = collision.GetContact(0);
