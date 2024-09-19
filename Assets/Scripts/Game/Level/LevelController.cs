@@ -28,6 +28,7 @@ namespace Game.Level
 
         public event Action<int> ChangeScoreEvent = delegate { };
         public event Action<BallEnum, int> ChangeShotsCountEvent = delegate { };
+        public event Action ReplayEvent = delegate { }; 
 
         public BallEnum CurrentBallType { get; private set; }
         public bool IsEnoughShots => _leftShotCount > 0;
@@ -137,6 +138,7 @@ namespace Game.Level
 
             ChangeScoreEvent(_currentScore);
             ChangeShotsCountEvent(NextBallType, _leftShotCount);
+            ReplayEvent();
         }
     }
 }

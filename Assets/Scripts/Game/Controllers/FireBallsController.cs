@@ -37,20 +37,22 @@ namespace Game.Controllers
         
         public void Subscribe()
         {
-            if (_dragButton == null || _fireBallFactory == null)
+            if (_dragButton == null || _fireBallFactory == null || _levelController == null)
                 return;
             
             _dragButton.EndDragEvent += Shot;
             _fireBallFactory.CollisionEvent += OnFireBallCollided;
+            _levelController.ReplayEvent += OnReplay;
         }
 
         public void Unsubscribe()
         {
-            if (_dragButton == null || _fireBallFactory == null)
+            if (_dragButton == null || _fireBallFactory == null || _levelController == null)
                 return;
             
             _dragButton.EndDragEvent -= Shot;
             _fireBallFactory.CollisionEvent -= OnFireBallCollided;
+            _levelController.ReplayEvent -= OnReplay;
         }
 
         private void Shot(Vector2 direction)
@@ -86,6 +88,14 @@ namespace Game.Controllers
         private void OnFireBallCollided(Ball ball, Collision2D collision)
         {
             _canShoot = true;
+        }
+        
+        private void OnReplay()
+        {
+            if (_levelController == null || _fireBall == null || _data == null)
+                return;
+            
+            _fireBall.Setup(_data.GetBallSprite(_levelController.CurrentBallType), _levelController.CurrentBallType);
         }
     }
 }
