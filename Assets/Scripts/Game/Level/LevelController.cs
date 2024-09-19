@@ -42,7 +42,7 @@ namespace Game.Level
 
             var levelDataLoader = serviceLocator.GetService<LevelDataLoader>();
 
-            _availableBalls.AddRange(levelDataLoader.LevelSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList());
+            _availableBalls.AddRange(levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList());
 
             NextBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];
             CurrentBallType = _availableBalls[Random.Range(0, _availableBalls.Count)];

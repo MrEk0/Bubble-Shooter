@@ -21,7 +21,7 @@ namespace Game.Controllers
         [CanBeNull] private readonly Walls _walls;
         
         private readonly List<Ball> _connectedBalls = new();
-        private readonly Dictionary<float, List<Ball>> _balls;
+        private readonly Dictionary<float, List<Ball>> _balls = new();
 
         public StaticBallsController(ServiceLocator serviceLocator)
         {
@@ -44,7 +44,7 @@ namespace Game.Controllers
             var startPosition = new Vector3(_walls.Bounds.min.x + _data.StartPositionOffset.x, _walls.Bounds.max.y + _data.StartPositionOffset.y, 0f);
             var maxBallsInRow = _data.BallSpacing.x <= 0f ? 0 : Mathf.FloorToInt((_walls.Bounds.size.x - _data.StartPositionOffset.x) / _data.BallSpacing.x) + 1;
 
-            var availableBalls = _levelDataLoader.LevelSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList();
+            var availableBalls = _levelDataLoader.LevelRowSettings.Where(o => o.IsAvailable).Select(o => o.Type).ToList();
 
             for (var i = 0; i < _data.LevelRowCounts; i++)
             {
@@ -114,7 +114,7 @@ namespace Game.Controllers
             else
                 _balls.Add(ballPosition.y, new List<Ball> { ball });
 
-            var typedBalls = _balls.Values.SelectMany(o => o).Where(o => o.Type == collidedBall.Type).ToList();
+            var typedBalls = _balls.Values.SelectMany(o => o).Where(o => o.gameObject.activeSelf && o.Type == collidedBall.Type).ToList();
             var maxDistance = new Vector3(_data.BallSpacing.x * 0.5f, _data.BallSpacing.y).magnitude;
             
             GetNeighbors(typedBalls, ball.transform, maxDistance);
